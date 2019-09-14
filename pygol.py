@@ -60,7 +60,7 @@ if __name__ == "__main__":
                     board[pos[1],pos[0]] = DRAW_MODE
 
         if not PAUSED:
-            board = libgol.compute_knightsmoves_generation(board, WRAP)
+            board = libgol.compute_generation(board, WRAP)
         draw_board(screen, board)
         pygame.display.flip()
         sleep(.01)

@@ -11,6 +11,9 @@ def draw_board(surface, board):
                 COLOR_ALIVE if board[y][x] else COLOR_DEAD,
                 (x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
+def screen_pos_to_cell(pos,cell_size):
+    return (pos[0]//cell_size,pos[1]//cell_size)
+
 if __name__ == "__main__":
     WIDTH = 600
     HEIGHT = 400
@@ -21,6 +24,9 @@ if __name__ == "__main__":
 
     WRAP = True
     PAUSED = False
+
+    DRAWING = False
+    DRAW_MODE = libgol.ALIVE # libgol.ALIVE | libgol.DEAD
 
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -40,10 +46,21 @@ if __name__ == "__main__":
                     PAUSED = not PAUSED
                 elif event.key == pygame.K_w:
                     WRAP = not WRAP
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    pos=screen_pos_to_cell(event.pos,CELL_SIZE)
+                    board[pos[1],pos[0]] = DRAW_MODE = libgol.ALIVE if board[pos[1],pos[0]]==libgol.DEAD else libgol.DEAD
+                    DRAWING = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button == 1:
+                    DRAWING = False
+            elif event.type == pygame.MOUSEMOTION:
+                if DRAWING:
+                    pos=screen_pos_to_cell(event.pos,CELL_SIZE)
+                    board[pos[1],pos[0]] = DRAW_MODE
 
-        sleep(.01)
         if not PAUSED:
-            board = libgol.compute_generation(board, WRAP)
-            draw_board(screen, board)
-
+            board = libgol.compute_knightsmoves_generation(board, WRAP)
+        draw_board(screen, board)
         pygame.display.flip()
+        sleep(.01)

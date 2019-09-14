@@ -27,3 +27,9 @@ The project will be split into two parts:
 * * *  <del>A function used by that function in order to determine the state of that cell in the next generation</del>
 * * * * ditched in favor of a single function using convolution using SciPy
 2. the Presentation/Application layer which displays the board and allows interaction written in pyGame
+
+# Implementation
+1. Implemented the games generation function "next_generation" as well as a helper function
+2. Implement a visualization of the game for a MVP
+3. Next Step: Add interactivity
+4. Next Step: Custom Generator Functions

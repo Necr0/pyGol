@@ -17,7 +17,7 @@ def screen_pos_to_cell(pos,cell_size):
 if __name__ == "__main__":
     WIDTH = 600
     HEIGHT = 400
-    CELL_SIZE = 10
+    CELL_SIZE = 5
 
     COLOR_DEAD = (255,255,255)
     COLOR_ALIVE = (0,0,0)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     board=libgol.create_board(WIDTH//CELL_SIZE,HEIGHT//CELL_SIZE)
-    board = libgol.randomize_board(board)
+    board = libgol.randomize_board(board,.5)
 
     draw_board(screen, board)
     while True:
@@ -46,6 +46,8 @@ if __name__ == "__main__":
                     PAUSED = not PAUSED
                 elif event.key == pygame.K_w:
                     WRAP = not WRAP
+                elif event.key == pygame.K_c:
+                    board = libgol.fill_board(board, libgol.DEAD)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     pos=screen_pos_to_cell(event.pos,CELL_SIZE)
@@ -60,7 +62,7 @@ if __name__ == "__main__":
                     board[pos[1],pos[0]] = DRAW_MODE
 
         if not PAUSED:
-            board = libgol.compute_generation(board, WRAP)
+            board = libgol.compute_rule110_generation(board, WRAP)
         draw_board(screen, board)
         pygame.display.flip()
         sleep(.01)

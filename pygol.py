@@ -32,7 +32,7 @@ if __name__ == "__main__":
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
     board=libgol.create_board(WIDTH//CELL_SIZE,HEIGHT//CELL_SIZE)
-    board = libgol.randomize_board(board,.5)
+    board = libgol.randomize_board(board,.7)
 
     draw_board(screen, board)
     while True:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
                     board[pos[1],pos[0]] = DRAW_MODE
 
         if not PAUSED:
-            board = libgol.compute_rule110_generation(board, WRAP)
+            board = libgol.compute_generation(board, kernel=libgol.kernel_gol, heuristic=libgol.heuristic_seeds, wrap = WRAP)
         draw_board(screen, board)
         pygame.display.flip()
         sleep(.01)

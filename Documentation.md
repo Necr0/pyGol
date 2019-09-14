@@ -31,5 +31,10 @@ The project will be split into two parts:
 # Implementation
 1. Implemented the games generation function "next_generation" as well as a helper function
 2. Implement a visualization of the game for a MVP
-3. Next Step: Add interactivity
-4. Next Step: Custom Generator Functions
+3. Add interactivity (added some keys)
+4. Custom Generator Functions
+6. Added mouse drawing
+5. All Generator functions can be expressed as a kernel(=convolution matrix) and an array containing the results after convolution that cause the cell to be alive (the cells own state is contained in the convolution matrix)
+6. Next step: load patterns from file
+7. Next step: Allow more than 1 state
+8. Next step: Allow saving/loading of patterns

@@ -1,0 +1,15 @@
+# Replicator (http://www.conwaylife.com/wiki/OCA:Replicator):
+kernel:
+  - [1, 1, 1]
+  - [1, 9, 1]
+  - [1, 1, 1]
+transitions:
+  1:
+    - 1
+    - 3
+    - 5
+    - 7
+    - 10
+    - 12
+    - 14
+    - 16

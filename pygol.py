@@ -83,7 +83,7 @@ if __name__ == "__main__":
     print("W: Toggle wrapping")
     print("C: Clear board")
     print("A: Load ruleset from file")
-    print("1-9: Change state for drawing")
+    print("0-9: Change state for drawing")
     print("Mouse Click+Drag: Draw state")
     print("Q: Quit")
 

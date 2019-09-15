@@ -20,7 +20,7 @@ R: Randomize board
 W: Toggle wrapping
 C: Clear board
 A: Load ruleset from file
-1-9: Change state for drawing
+0-9: Change state for drawing
 Mouse Click+Drag: Draw state
 Q: Quit
 ```

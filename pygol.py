@@ -8,7 +8,7 @@ import yaml
 import importlib.util
 import scipy
 from tkinter import Tk
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 color_scheme_default = {
     0: (255, 255, 255),
@@ -25,25 +25,27 @@ def draw_board(surface, board, color_scheme=color_scheme_default):
 def screen_pos_to_cell(pos,cell_size):
     return (pos[0]//cell_size,pos[1]//cell_size)
 
-def load_ruleset(yaml_path):
+def load_yaml_file(yaml_path):
     with open(yaml_path, 'r') as stream:
+        return yaml.safe_load(stream) #parse yaml
 
-        ruleset=yaml.safe_load(stream) #parse yaml
+def load_ruleset(yaml_path):
+    ruleset=load_yaml_file(yaml_path)
 
-        if "transition_function_file" in ruleset:
-            spec = importlib.util.spec_from_file_location(
-                __name__,
-                path.join(path.dirname(yaml_path),
-                        ruleset["transition_function_file"])
-            )
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-            ruleset["transition_function"] = module.transition
-        
-        if "states" not in ruleset:
-            ruleset["states"]=[0,1]
-        
-        return ruleset
+    if "transition_function_file" in ruleset:
+        spec = importlib.util.spec_from_file_location(
+            __name__,
+            path.join(path.dirname(yaml_path),
+                    ruleset["transition_function_file"])
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        ruleset["transition_function"] = module.transition
+    
+    if "states" not in ruleset:
+        ruleset["states"]=[0,1]
+    
+    return ruleset
 
 NUMBER_KEYS = [
     pygame.K_0,
@@ -83,6 +85,8 @@ if __name__ == "__main__":
     print("W: Toggle wrapping")
     print("C: Clear board")
     print("A: Load ruleset from file")
+    print("S: Save snapshot to file")
+    print("L: Load snapshot from file")
     print("0-9: Change state for drawing")
     print("Mouse Click+Drag: Draw state")
     print("Q: Quit")
@@ -93,17 +97,23 @@ if __name__ == "__main__":
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN: #Handle key presses
+
                 if event.key == pygame.K_q: #Quit on Q
                     sys.exit()
+
                 if event.key == pygame.K_r: #Randomize on R
                     board = libgol.randomize_board(board, active_ruleset["states"])
+
                 elif event.key == pygame.K_p: #Pause on P
                     paused = not paused
+
                 elif event.key == pygame.K_w: #Toggle board wrapping on W
                     wrap = not wrap
                     print("Wrapping is now {}.".format("on" if wrap else "off"))
+
                 elif event.key == pygame.K_c: #Clear on C
                     board = libgol.fill_board(board, libgol.DEAD)
+
                 elif event.key == pygame.K_a: #Load ruleset
                     file = askopenfilename(
                                 initialdir="./rulesets/",
@@ -114,9 +124,30 @@ if __name__ == "__main__":
                     if file:
                         active_ruleset = load_ruleset(file)
                         print("Changed active ruleset to {}".format(file))
+                    
+                elif event.key == pygame.K_s: #Save snapshot
+                    file = asksaveasfilename(
+                                initialdir="./snapshots/",
+                                title="Save snapshot")
+                    if file:
+                        scipy.save(file, board)
+                        print("Saved snapshot to {}".format(file))
+                    
+                elif event.key == pygame.K_l: #Load snapshot
+                    file = askopenfilename(
+                                initialdir="./snapshots/",
+                                title="Load snapshot",
+                                filetypes=(
+                                    ("NumPy array files","*.npy"),
+                                    ("All files","*.*")))
+                    if file:
+                        board = scipy.load(file)
+                        print("Loaded snapshot from {}".format(file))
+                
                 elif event.key in NUMBER_KEYS:
                     draw_mode = NUMBER_KEYS.index(event.key)
                     print("Now drawing with cell state={}".format(draw_mode))
+                    
             elif event.type == pygame.MOUSEBUTTONDOWN: #Handle mouse drawing start
                 if event.button == 1:
                     pos=screen_pos_to_cell(event.pos,CELL_SIZE)

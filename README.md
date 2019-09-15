@@ -20,6 +20,8 @@ R: Randomize board
 W: Toggle wrapping
 C: Clear board
 A: Load ruleset from file
+S: Save snapshot to file
+L: Load snapshot from file
 0-9: Change state for drawing
 Mouse Click+Drag: Draw state
 Q: Quit

@@ -44,3 +44,42 @@ The project will be split into two parts:
     * this was done by actually displaying keyboard shortcuts available
 10. Next step: changable board size and cell size
     * changing the cell size and board size may be easy but would cause saving and loading to break and would also have to change the window size
+
+# Convolution
+
+## What is convolution?
+
+Convolution involves having a matrix and applying a kernel to each cell. The kernel is centered on the cell in question and describes weights for a cell and the cells neighborhood. The cell and neighbous are then multiplied with the corresponding weight in the kernel and then summed. The resulting sum is the value for the cell at the same position in the resulting matrix.
+
+## Applying it to the Game of Life
+
+```
+[[1 1 1]
+ [1 0 1]
+ [1 1 1]]
+```
+
+The above kernel has a weight of 1 for all cells in the center cell's [Moore neighborhood](https://en.wikipedia.org/wiki/Moore_neighborhood), assuming that a living cell has a value of 1, this will mean convolution using this kernel, will result in the neighbor count of a cell in the resulting cell.
+
+```
+[[0 0 0 0]       [[2 3 2 1] 
+ [1 1 1 0]   =>   [2 4 3 2] 
+ [0 1 1 0]        [3 4 3 2] 
+ [0 0 0 0]]       [1 2 2 1]]
+```
+
+Given matrix containing the cell A and the convolved matrix B we can say that for any given cell at x, y of A the count of neighbors is contained in B at x, y. Thus for any cell x, y cotained within A we can decide wether the next generation lives on the basis of the values A[x,y] and B[x,y].
+This simplifies the problem a lot because we don't have to implement counting neighbors ourselves but can use existing convolution functions instead.
+
+## Getting rid of matrix A
+
+Since the count of living neighbors can never exceed 8 we can define the center of the kernel to have a value of 9:
+
+```
+[[1 1 1]
+ [1 9 1]
+ [1 1 1]]
+```
+
+This the convolution result not only contains the amount of living neighbors but also wether or not the cell itself is alive or dead. If the cell of the convolutions result is more than or equal to 9 the original cell must have been alive, otherwise it must have been dead. To get the amount of alive neighbours we can simply subtract 9 if the value is above 9 or leave it as is otherwise.
+This way we can decide wether or not wether or not the next generation lives on the basis of B[x,y] alone. Since we now have just one value to base our decision on we can simply express the rules for wether or not the cell should be alive in the next generation in a flat array. If the value is contained within said array it is alive, otherwise it is dead. This way we can express the game of lifes ruleset in just 2 objects: 1. a kernel, 2. a list of results leading to a living cell.

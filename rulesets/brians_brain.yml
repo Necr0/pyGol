@@ -1,0 +1,14 @@
+# Brian's Brain (https://en.wikipedia.org/wiki/Brian%27s_Brain):
+kernel:
+  - [4,    16,    64   ]
+  - [256,  1,     1024 ]
+  - [4096, 16384, 65536]
+transition_function_file: "brians_brain.py"
+colors:
+  0: [0,   0,   0  ] #dead
+  1: [255, 255, 255] #alive
+  2: [0,   0,   255] #dying
+states:
+  - 0
+  - 1
+  - 2

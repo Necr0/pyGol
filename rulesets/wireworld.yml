@@ -1,14 +1,16 @@
 # Wireworld (https://en.wikipedia.org/wiki/Wireworld):
 kernel:
-  - [1, 2, 1]
-  - [2, 9, 2]
-  - [1, 2, 1]
-transitions:
-  1:
-    - 1 #conductor → electron head if exactly one or two of the neighbouring cells are electron heads
-    - 2
-  2:
-    - 3
-    - 4
-    - 5
-#NOPE NOPE NOPE NOPE NOPE, I am not writing several thousand rules
+  - [4,    16,    64   ]
+  - [256,  1,     1024 ]
+  - [4096, 16384, 65536]
+transition_function_file: "wireworld.py"
+colors:
+  0: [0,   0,   0  ] #empty
+  1: [255, 255, 0  ] #conductor
+  2: [0,   0,   255]
+  3: [255, 0,   0  ]
+states:
+  - 0
+  - 1
+  - 2
+  - 3

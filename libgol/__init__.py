@@ -1,14 +1,15 @@
 import scipy
 from scipy.signal import convolve2d
 from time import sleep
-from random import random
+import random
 from yaml import load
+
 
 DEAD=0
 ALIVE=1
 
 def create_board(width, height, initial_cell_state = DEAD):
-    return scipy.full((height, width),initial_cell_state)
+    return scipy.full((width, height),initial_cell_state)
 
 def fill_board(board, state = ALIVE, in_place = False):
     if not in_place:
@@ -42,18 +43,25 @@ def compute_generation(board, ruleset=ruleset_gol, wrap=False, fill=0, in_place=
     #modify a new board if in_place is false else modify the existing board
     new_board = board if in_place else scipy.empty_like(board)
 
+    #iterate every cell in the convolved array
     for (x,y), neighbours in scipy.ndenumerate(convolved):
-        new_state=0
-        for transtion_state, transition_rule in ruleset['transitions'].items():
-            if neighbours in transition_rule:
-                new_state=transtion_state
-                break
-        new_board[x,y] = new_state
+
+        new_state=0 # default to 0 for new state
+
+        if "transitions" in ruleset: # if there is a simple dictionary for transitions given use it
+            for transtion_state, transition_rule in ruleset['transitions'].items():
+                if neighbours in transition_rule:
+                    new_state=transtion_state
+                    break
+        elif "transition_function" in ruleset: # if a transition function is given use it instead
+            new_state = ruleset["transition_function"](neighbours)
+        
+        new_board[x,y] = new_state # set the cells new state to the result
 
     return new_board
 
-def randomize_board(board, ratio=.2, birth_only=False, in_place=False):
+def randomize_board(board, states=[DEAD,ALIVE], in_place=False):
     new_board = board if in_place else scipy.empty_like(board)
     for (x,y), _ in scipy.ndenumerate(new_board):
-        new_board[x,y] = ALIVE if random()<=ratio else (board[x,y] if birth_only else DEAD)
+        new_board[x,y] = random.choice(states)
     return new_board

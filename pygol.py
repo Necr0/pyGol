@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pygame
 import libgol
 import sys
@@ -44,21 +45,33 @@ def load_ruleset(yaml_path):
         
         return ruleset
 
+NUMBER_KEYS = [
+    pygame.K_0,
+    pygame.K_1,
+    pygame.K_2,
+    pygame.K_3,
+    pygame.K_4,
+    pygame.K_5,
+    pygame.K_6,
+    pygame.K_7,
+    pygame.K_8,
+    pygame.K_9]
+
 if __name__ == "__main__":
     root = Tk()
     root.withdraw()
 
-    WIDTH = 600
-    HEIGHT = 400
+    WIDTH = 1280
+    HEIGHT = 720
     CELL_SIZE = 10
 
-    WRAP = True
-    PAUSED = False
+    wrap = True
+    paused = False
 
-    DRAWING = False
-    DRAW_MODE = libgol.ALIVE # libgol.ALIVE | libgol.DEAD
+    drawing = False
+    draw_mode = libgol.ALIVE
 
-    ACTIVE_RULESET = load_ruleset("./rulesets/gol.yml")
+    active_ruleset = load_ruleset("./rulesets/gol.yml")
 
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -66,18 +79,27 @@ if __name__ == "__main__":
     board = libgol.create_board(WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE)
     board = libgol.randomize_board(board)
 
+    print("R: Randomize board")
+    print("W: Toggle wrapping")
+    print("C: Clear board")
+    print("A: Load ruleset from file")
+    print("1-9: Change state for drawing")
+    print("Mouse Click+Drag: Draw state")
+
     draw_board(screen, board)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.KEYDOWN: #Handle key presses
+                if event.key == pygame.K_q: #Quit on Q
+                    sys.exit()
                 if event.key == pygame.K_r: #Randomize on R
-                    board = libgol.randomize_board(board, ACTIVE_RULESET["states"])
+                    board = libgol.randomize_board(board, active_ruleset["states"])
                 elif event.key == pygame.K_p: #Pause on P
-                    PAUSED = not PAUSED
+                    paused = not paused
                 elif event.key == pygame.K_w: #Toggle board wrapping on W
-                    WRAP = not WRAP
+                    wrap = not wrap
                 elif event.key == pygame.K_c: #Clear on C
                     board = libgol.fill_board(board, libgol.DEAD)
                 elif event.key == pygame.K_a: #Load ruleset
@@ -88,25 +110,29 @@ if __name__ == "__main__":
                                     ("YAML files","*.yml *.yaml"),
                                     ("All files","*.*")))
                     if file:
-                        ACTIVE_RULESET = load_ruleset(file)
+                        active_ruleset = load_ruleset(file)
+                        print("Changed active ruleset to {}".format(file))
+                elif event.key in NUMBER_KEYS:
+                    draw_mode = NUMBER_KEYS.index(event.key)
+                    print("Now drawing with cell state={}".format(draw_mode))
             elif event.type == pygame.MOUSEBUTTONDOWN: #Handle mouse drawing start
                 if event.button == 1:
                     pos=screen_pos_to_cell(event.pos,CELL_SIZE)
-                    board[pos[0],pos[1]] = DRAW_MODE = libgol.ALIVE if board[pos]==libgol.DEAD else libgol.DEAD
-                    DRAWING = True
+                    board[pos] = draw_mode
+                    drawing = True
             elif event.type == pygame.MOUSEBUTTONUP: #Handle mouse drawing end
                 if event.button == 1:
-                    DRAWING = False
+                    drawing = False
             elif event.type == pygame.MOUSEMOTION: #Handle mouse drawing movement
-                if DRAWING:
+                if drawing:
                     pos=screen_pos_to_cell(event.pos,CELL_SIZE)
-                    board[pos[0],pos[1]] = DRAW_MODE
+                    board[pos] = draw_mode
 
-        if not PAUSED:
-            board = libgol.compute_generation(board, ruleset=ACTIVE_RULESET, wrap = WRAP, fill=0)
+        if not paused:
+            board = libgol.compute_generation(board, ruleset=active_ruleset, wrap = wrap, fill=0)
         draw_board(
             screen,
             board,
-            color_scheme=ACTIVE_RULESET["colors"] if "colors" in ACTIVE_RULESET else color_scheme_default)
+            color_scheme=active_ruleset["colors"] if "colors" in active_ruleset else color_scheme_default)
         pygame.display.flip()
         sleep(.01)

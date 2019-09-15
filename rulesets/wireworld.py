@@ -8,7 +8,8 @@ def quaterneray(n):
     return ''.join(reversed(nums))
 
 def transition(result):
-    if result%4 == 1 and quaterneray(result).count('2')==2:
+    quat = quaterneray(result).count('2')
+    if result%4 == 1  and (quat==1 or quat==2):
             return 2
     elif result%4 == 2:
         return 3

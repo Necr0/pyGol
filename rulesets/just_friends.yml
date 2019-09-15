@@ -1,0 +1,7 @@
+# Just Friends (http://psoup.math.wisc.edu/mcell/rullex_gebi.html):
+kernel:
+  - [2,  4,   8  ]
+  - [16, 1,   32 ]
+  - [64, 128, 256]
+transition_function_file: "just_friends.py"
+

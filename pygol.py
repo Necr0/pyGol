@@ -85,6 +85,7 @@ if __name__ == "__main__":
     print("A: Load ruleset from file")
     print("1-9: Change state for drawing")
     print("Mouse Click+Drag: Draw state")
+    print("Q: Quit")
 
     draw_board(screen, board)
     while True:
@@ -100,6 +101,7 @@ if __name__ == "__main__":
                     paused = not paused
                 elif event.key == pygame.K_w: #Toggle board wrapping on W
                     wrap = not wrap
+                    print("Wrapping is now {}.".format("on" if wrap else "off"))
                 elif event.key == pygame.K_c: #Clear on C
                     board = libgol.fill_board(board, libgol.DEAD)
                 elif event.key == pygame.K_a: #Load ruleset

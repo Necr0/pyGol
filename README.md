@@ -16,7 +16,6 @@ $ pipenv run python3 ./pygol.py
 
 The controls are as follows:  
 ```
-Hello from the pygame community. https://www.pygame.org/contribute.html
 R: Randomize board
 W: Toggle wrapping
 C: Clear board

@@ -1,0 +1,14 @@
+# Wireworld (https://en.wikipedia.org/wiki/Wireworld):
+kernel:
+  - [1, 2, 1]
+  - [2, 9, 2]
+  - [1, 2, 1]
+transitions:
+  1:
+    - 1 #conductor → electron head if exactly one or two of the neighbouring cells are electron heads
+    - 2
+  2:
+    - 3
+    - 4
+    - 5
+#NOPE NOPE NOPE NOPE NOPE, I am not writing several thousand rules

@@ -1,0 +1,11 @@
+# Highlife (https://en.wikipedia.org/wiki/Highlife_(cellular_automaton)):
+kernel:
+  - [1, 1, 1]
+  - [1, 9, 1]
+  - [1, 1, 1]
+transitions:
+  1:
+    - 3 #spawn if neighbour count is 3 or 6
+    - 6
+    - 11 #stay alive if neighbour count is 2 or 3
+    - 12

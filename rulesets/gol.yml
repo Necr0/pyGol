@@ -1,0 +1,10 @@
+# Conway's Game of Life (https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life):
+kernel:
+  - [1, 1, 1]
+  - [1, 9, 1]
+  - [1, 1, 1]
+transitions:
+  1:
+    - 3 #spawn if neighbour count is 3
+    - 11 #stay alive if neighbour count is 2 or 3
+    - 12

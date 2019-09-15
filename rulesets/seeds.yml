@@ -1,0 +1,8 @@
+# Seeds (https://en.wikipedia.org/wiki/Seeds_(cellular_automaton)):
+kernel:
+  - [1, 1, 1]
+  - [1, 9, 1]
+  - [1, 1, 1]
+transitions:
+  1:
+    - 2 #spawn if neighbour count is 2 and cell is dead, die otherwise

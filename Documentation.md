@@ -35,6 +35,9 @@ The project will be split into two parts:
 4. Custom Generator Functions
 6. Added mouse drawing
 5. All Generator functions can be expressed as a kernel(=convolution matrix) and an array containing the results after convolution that cause the cell to be alive (the cells own state is contained in the convolution matrix)
-6. Next step: load patterns from file
-7. Next step: Allow more than 1 state
+6. Load rulesets from file
+7. Allow more than 1 state in a ruleset
+* * the amount of rules increases exponentially with the number of states, wireworld(4 states) has 4^9= 4^9=262144 potential rules
+* * * solution: allow loading python functions from file
 8. Next step: Allow saving/loading of patterns
+9. Next step: fancier interface

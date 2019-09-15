@@ -1,0 +1,19 @@
+# Rule 110 (https://en.wikipedia.org/wiki/Rule_90): 
+kernel:
+  - [0, 8, 0]
+  - [1, 2, 4]
+  - [0, 0, 0]
+transitions:
+  1:
+    - 1 #next generation
+    - 2
+    - 4
+    - 6
+    - 8 #move previous generation upward
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15

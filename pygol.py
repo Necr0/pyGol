@@ -88,6 +88,8 @@ if __name__ == "__main__":
     board = libgol.create_board(WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE)
     board = libgol.randomize_board(board)
 
+    print("P: Toggle pause")
+    print("N: Progress single generation")
     print("R: Randomize board")
     print("W: Toggle wrapping")
     print("C: Clear board")
@@ -152,6 +154,13 @@ if __name__ == "__main__":
                     if file:
                         board = scipy.load(file)
                         print("Loaded snapshot from {}".format(file))
+
+                elif event.key == pygame.K_n:  # Load snapshot
+                    if not paused:
+                        paused = True
+                    board = libgol.compute_generation(
+                        board, ruleset=active_ruleset, wrap=wrap, fill=0)
+                    
 
                 elif event.key in NUMBER_KEYS:
                     draw_mode = NUMBER_KEYS.index(event.key)

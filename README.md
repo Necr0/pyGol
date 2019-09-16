@@ -21,6 +21,8 @@ $ pipenv shell
 
 The controls are as follows:  
 ```
+P: Toggle pause
+N: Progress single generation
 R: Randomize board
 W: Toggle wrapping
 C: Clear board

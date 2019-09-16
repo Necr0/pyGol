@@ -29,6 +29,8 @@ C: Clear board
 A: Load ruleset from file
 S: Save snapshot to file
 L: Load snapshot from file
+Right: Increase speed
+Left: Decrease speed
 0-9: Change state for drawing
 Mouse Click+Drag: Draw state
 Q: Quit

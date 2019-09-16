@@ -88,6 +88,9 @@ if __name__ == "__main__":
     board = libgol.create_board(WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE)
     board = libgol.randomize_board(board)
 
+    INTERVAL_STEPS = .01
+    interval = .02
+
     print("P: Toggle pause")
     print("N: Progress single generation")
     print("R: Randomize board")
@@ -96,6 +99,8 @@ if __name__ == "__main__":
     print("A: Load ruleset from file")
     print("S: Save snapshot to file")
     print("L: Load snapshot from file")
+    print("Right: Increase speed")
+    print("Left: Decrease speed")
     print("0-9: Change state for drawing")
     print("Mouse Click+Drag: Draw state")
     print("Q: Quit")
@@ -116,6 +121,8 @@ if __name__ == "__main__":
 
                 elif event.key == pygame.K_p:  # Pause on P
                     paused = not paused
+                    print("Game is now {}.".format(
+                        "paused" if paused else "unpaused"))
 
                 elif event.key == pygame.K_w:  # Toggle board wrapping on W
                     wrap = not wrap
@@ -155,12 +162,19 @@ if __name__ == "__main__":
                         board = scipy.load(file)
                         print("Loaded snapshot from {}".format(file))
 
-                elif event.key == pygame.K_n:  # Load snapshot
+                elif event.key == pygame.K_n:  # Progress single generation and pause on N
                     if not paused:
                         paused = True
                     board = libgol.compute_generation(
-                        board, ruleset=active_ruleset, wrap=wrap, fill=0)
-                    
+                        board, ruleset=active_ruleset, wrap=wrap)
+
+                elif event.key == pygame.K_RIGHT:  # Increase speed on Right Arrow
+                    interval = max(interval-INTERVAL_STEPS, 0)
+                    print("Interval is now {} seconds.".format(interval))
+
+                elif event.key == pygame.K_LEFT:  # Decrease speed on Left Arrow
+                    interval = min(interval+INTERVAL_STEPS, 60)
+                    print("Interval is now {} seconds.".format(interval))
 
                 elif event.key in NUMBER_KEYS:
                     draw_mode = NUMBER_KEYS.index(event.key)
@@ -181,10 +195,10 @@ if __name__ == "__main__":
 
         if not paused:
             board = libgol.compute_generation(
-                board, ruleset=active_ruleset, wrap=wrap, fill=0)
+                board, ruleset=active_ruleset, wrap=wrap)
         draw_board(
             screen,
             board,
             color_scheme=active_ruleset["colors"] if "colors" in active_ruleset else color_scheme_default)
         pygame.display.flip()
-        sleep(.01)
+        sleep(interval)

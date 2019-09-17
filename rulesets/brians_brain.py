@@ -9,7 +9,7 @@ def ternary(n):
 
 def transition(result):
     if result%3 == 0 and ternary(result).count('1')==2:
-            return 1
+        return 1
     elif result%3 == 1:
         return 2
     else:

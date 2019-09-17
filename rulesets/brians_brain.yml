@@ -1,8 +1,8 @@
 # Brian's Brain (https://en.wikipedia.org/wiki/Brian%27s_Brain):
 kernel:
-  - [4,    16,    64   ]
-  - [256,  1,     1024 ]
-  - [4096, 16384, 65536]
+  - [3,   9,    27  ]
+  - [81,  1,    243 ]
+  - [729, 2187, 6561]
 transition_function_file: "brians_brain.py"
 colors:
   0: [0,   0,   0  ] #dead

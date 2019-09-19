@@ -52,6 +52,8 @@ class Board:
         return chunk
 
     def __getitem__(self, key):
+        #TODO: Add a possibility to add a function that defines what undefined cells state is
+        #Problem: if an out of bounds cell may have a value
         chunk = self.__chunk_for(key)
         return chunk[
                 modi(key[0],self.__CHUNK_SIZE),
@@ -89,13 +91,28 @@ class Board:
             ceil(kernel.size[1]/self.__CHUNK_SIZE))
     
     def convolve_at(self, pos: Position, kernel: scipy.ndarray):
-        pass
+        offset_x = (kernel.size[0]-1)//2
+        offset_y = (kernel.size[1]-1)//2
+        return sum(
+            self[pos[0]+x-offset_x,pos[1]+y-offset_y] * weight
+            for (x, y), weight in scipy.ndenumerate(kernel)
+        )
+
+    def compute_generation_at(self, pos: Position, ruleset):
+        convolved = self.convolve_at(pos, ruleset["kernel"])
+
+        if "transitions" in ruleset:  # if there is a simple dictionary for transitions given use it
+            for transtion_state, transition_rule in ruleset['transitions'].items():
+                if convolved in transition_rule:
+                    return transtion_state
+        if "transition_function" in ruleset:  # if a transition function is given use it instead
+            return ruleset["transition_function"](convolved)
 
     def compute_generation(self, ruleset):
         new_chunks = {}
         chunks_to_compute = []
 
-        kernel_reach_x, kernel_reach_y = self.reach_for_kernel()
+        kernel_reach_x, kernel_reach_y = self.reach_for_kernel(ruleset["kernel"])
 
         for chunk_pos_x, chunk_pos_y in self.chunks:
             for compute_y in range(chunk_pos_y-kernel_reach_y, chunk_pos_y+kernel_reach_y+1):
@@ -103,10 +120,17 @@ class Board:
                     if (compute_x,compute_y) not in chunks_to_compute:
                         chunks_to_compute.append((compute_x,compute_y))
         
-        for chunk_x, chunk_y in chunks_to_compute:
-            for pos_y in range(chunk_y*self.__CHUNK_SIZE,chunk_y*self.__CHUNK_SIZE+self.__CHUNK_SIZE):
-                for pos_x in range(chunk_x*self.__CHUNK_SIZE,chunk_x*self.__CHUNK_SIZE+self.__CHUNK_SIZE):
-                    self.convolve_at((pos_x,pos_y), ruleset["kernel"])
+        #TODO: Multi-threading, it sounds insane for a small hobbist project but I am being serious
+        for chunk_pos in chunks_to_compute:
+            chunk = Chunk(self.__CHUNK_SIZE, self.__CHUNK_SIZE)
+            for in_chunk_pos in chunk:
+                chunk[in_chunk_pos] = self.compute_generation_at(
+                    (chunk_pos[0]*self.__CHUNK_SIZE+in_chunk_pos[0],chunk_pos[1]*self.__CHUNK_SIZE+in_chunk_pos[1]),
+                    ruleset)
+            if not chunk.empty():
+                new_chunks[chunk_pos] = chunk
+        
+        self.chunks = new_chunks
         
 #b = Board()
 #b[12,4] = 1

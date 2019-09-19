@@ -1,10 +1,9 @@
 import random
 from time import sleep
-from math import floor
+from math import floor, ceil
 
 import scipy
 from scipy.signal import convolve2d
-from numba import njit
 
 DEAD = 0
 ALIVE = 1
@@ -12,13 +11,14 @@ ALIVE = 1
 from typing import Tuple, Dict
 Position = Tuple[int, int]
 
-@njit
 def modi(a:int, b:int) -> int:
     return a - a // b * b
 
 class Chunk:
     def __init__(self, width:int, height:int):
         self.__occupied_cells = 0
+        self.width = width
+        self.height = height
         self.__array : scipy.ndarray = scipy.full((width, height), 0)
 
     def __getitem__(self, key:Position) -> int:
@@ -32,6 +32,9 @@ class Chunk:
     
     def empty(self) -> bool:
         return not self.__occupied_cells
+    
+    def __iter__(self):
+        return (((x,y),self.__array[x,y]) for y in range(self.height) for x in range(self.width))
 
 class Board:
     def __init__(self, chunk_size:int = 16):
@@ -63,12 +66,56 @@ class Board:
             chunk = self.__create_chunk((key[0]//self.__CHUNK_SIZE, key[1]//self.__CHUNK_SIZE))
         chunk[in_chunk_pos] = value
     
+    def clear(self):
+        self.chunks = {}
+
     def clean(self):
         for key in list(self.chunks.keys()):
             if self.chunks[key].empty():
                 del self.chunks[key]
+    
+    def __iter__(self):
+        return (
+            (
+                (chunk_pos[0]*self.__CHUNK_SIZE+in_chunk_pos[0], chunk_pos[1]*self.__CHUNK_SIZE+in_chunk_pos[1]),
+                state
+            )
+            for chunk_pos, chunk in self.chunks.items()
+            for in_chunk_pos, state in chunk)
 
-@njit
+    def reach_for_kernel(self, kernel):
+        return (
+            ceil(kernel.size[0]/self.__CHUNK_SIZE),
+            ceil(kernel.size[1]/self.__CHUNK_SIZE))
+    
+    def convolve_at(self, pos: Position, kernel: scipy.ndarray):
+        pass
+
+    def compute_generation(self, ruleset):
+        new_chunks = {}
+        chunks_to_compute = []
+
+        kernel_reach_x, kernel_reach_y = self.reach_for_kernel()
+
+        for chunk_pos_x, chunk_pos_y in self.chunks:
+            for compute_y in range(chunk_pos_y-kernel_reach_y, chunk_pos_y+kernel_reach_y+1):
+                for compute_x in range(chunk_pos_x-kernel_reach_x, chunk_pos_x+kernel_reach_x+1):
+                    if (compute_x,compute_y) not in chunks_to_compute:
+                        chunks_to_compute.append((compute_x,compute_y))
+        
+        for chunk_x, chunk_y in chunks_to_compute:
+            for pos_y in range(chunk_y*self.__CHUNK_SIZE,chunk_y*self.__CHUNK_SIZE+self.__CHUNK_SIZE):
+                for pos_x in range(chunk_x*self.__CHUNK_SIZE,chunk_x*self.__CHUNK_SIZE+self.__CHUNK_SIZE):
+                    self.convolve_at((pos_x,pos_y), ruleset["kernel"])
+        
+#b = Board()
+#b[12,4] = 1
+#b[2,16] = 1
+#print(b.chunks)
+#for pos, state in b:
+#    print(pos)
+
+
 def create_board(width:int, height:int, initial_cell_state:int=DEAD) -> scipy.ndarray:
     """
     Creates a new 2D NumPy array representing a board with the given dimensions
@@ -86,7 +133,6 @@ def create_board(width:int, height:int, initial_cell_state:int=DEAD) -> scipy.nd
     """
     return scipy.full((width, height), initial_cell_state)
 
-@njit
 def fill_board(board:scipy.ndarray, state:int=ALIVE, in_place:bool=False) -> scipy.ndarray:
     """
     Takes a board and fills all cells with the given state or ALIVE

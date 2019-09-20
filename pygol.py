@@ -12,32 +12,37 @@ import yaml
 
 import libgol
 
+
 color_scheme_default = {
     0: (255, 255, 255),
     1: (0,   0,   0)
 }
 
 
-def draw_board(surface, board, cell_size, color_scheme=color_scheme_default):
-    for (x, y), state in scipy.ndenumerate(board):
-        pygame.draw.rect(
-            surface,
-            color_scheme[state] if state in color_scheme else color_scheme_default[1],
-            (x*cell_size, y*cell_size, cell_size, cell_size))
+def draw_board(surface, board: libgol.Board, rect, cell_size: int, color_scheme=color_scheme_default):
+    for cell_x in range(rect[0], rect[0]+rect[2]):
+        for cell_y in range(rect[1], rect[1]+rect[3]):
+            state = board[cell_x, cell_y]
+            pygame.draw.rect(
+                surface,
+                color_scheme[state] if state in color_scheme else color_scheme_default[1],
+                (cell_x*cell_size, cell_y*cell_size, cell_size, cell_size))
 
-def draw_cursor(surface, pos, cell_size):
-    if cell_size<3:
+
+def draw_cursor(surface, pos: libgol.Position, cell_size: int):
+    if cell_size < 3:
         return
     pygame.draw.rect(
         screen,
-        (0,0,0),
-        (pos[0]*cell_size,pos[1]*cell_size, cell_size, cell_size),
+        (0, 0, 0),
+        (pos[0]*cell_size, pos[1]*cell_size, cell_size, cell_size),
         2)
     pygame.draw.rect(
         screen,
-        (255,255,255),
-        (pos[0]*cell_size,pos[1]*cell_size, cell_size, cell_size),
+        (255, 255, 255),
+        (pos[0]*cell_size, pos[1]*cell_size, cell_size, cell_size),
         1)
+
 
 def screen_pos_to_cell(pos, cell_size):
     return (pos[0]//cell_size, pos[1]//cell_size)
@@ -51,6 +56,7 @@ def load_yaml_file(yaml_path):
 def load_ruleset(yaml_path):
     ruleset = load_yaml_file(yaml_path)
 
+    ruleset["kernel"] = scipy.array(ruleset["kernel"])
     if "transition_function_file" in ruleset:
         spec = importlib.util.spec_from_file_location(
             __name__,
@@ -88,7 +94,7 @@ if __name__ == "__main__":
     CELL_SIZE = 10
 
     wrap = True
-    paused = False
+    paused = True
 
     drawing = False
     draw_mode = libgol.ALIVE
@@ -96,10 +102,10 @@ if __name__ == "__main__":
     active_ruleset = load_ruleset("./rulesets/gol.yml")
 
     pygame.init()
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.DOUBLEBUF|pygame.HWSURFACE)
+    screen = pygame.display.set_mode(
+        (WIDTH, HEIGHT), pygame.DOUBLEBUF | pygame.HWSURFACE)
 
-    board = libgol.create_board(WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE)
-    board = libgol.randomize_board(board)
+    board = libgol.Board(chunk_size=(12,12), max_chunk_count=32)
 
     INTERVAL_STEPS = .01
     interval = .02
@@ -118,7 +124,9 @@ if __name__ == "__main__":
     print("Mouse Click+Drag: Draw state")
     print("Q: Quit")
 
-    draw_board(screen, board, CELL_SIZE)
+    draw_board(screen, board,
+               (0, 0, WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE),
+               CELL_SIZE)
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -128,22 +136,22 @@ if __name__ == "__main__":
                 if event.key == pygame.K_q:  # Quit on Q
                     sys.exit()
 
-                if event.key == pygame.K_r:  # Randomize on R
-                    board = libgol.randomize_board(
-                        board, active_ruleset["states"])
+                # elif event.key == pygame.K_r:  # Randomize on R
+                #    board = libgol.randomize_board(
+                #        board, active_ruleset["states"])
 
                 elif event.key == pygame.K_p:  # Pause on P
                     paused = not paused
                     print("Game is now {}.".format(
                         "paused" if paused else "unpaused"))
 
-                elif event.key == pygame.K_w:  # Toggle board wrapping on W
-                    wrap = not wrap
-                    print("Wrapping is now {}.".format(
-                        "on" if wrap else "off"))
+                # elif event.key == pygame.K_w:  # Toggle board wrapping on W
+                #     wrap = not wrap
+                #     print("Wrapping is now {}.".format(
+                #         "on" if wrap else "off"))
 
                 elif event.key == pygame.K_c:  # Clear on C
-                    board = libgol.fill_board(board, libgol.DEAD)
+                    board.clear()
 
                 elif event.key == pygame.K_a:  # Load ruleset
                     file = askopenfilename(
@@ -156,30 +164,29 @@ if __name__ == "__main__":
                         active_ruleset = load_ruleset(file)
                         print("Changed active ruleset to {}".format(file))
 
-                elif event.key == pygame.K_s:  # Save snapshot
-                    file = asksaveasfilename(
-                        initialdir="./snapshots/",
-                        title="Save snapshot")
-                    if file:
-                        scipy.save(file, board)
-                        print("Saved snapshot to {}".format(file))
+                # elif event.key == pygame.K_s:  # Save snapshot
+                #     file = asksaveasfilename(
+                #         initialdir="./snapshots/",
+                #         title="Save snapshot")
+                #     if file:
+                #         scipy.save(file, board)
+                #         print("Saved snapshot to {}".format(file))
 
-                elif event.key == pygame.K_l:  # Load snapshot
-                    file = askopenfilename(
-                        initialdir="./snapshots/",
-                        title="Load snapshot",
-                        filetypes=(
-                            ("NumPy array files", "*.npy"),
-                            ("All files", "*.*")))
-                    if file:
-                        board = scipy.load(file)
-                        print("Loaded snapshot from {}".format(file))
+                # elif event.key == pygame.K_l:  # Load snapshot
+                #     file = askopenfilename(
+                #         initialdir="./snapshots/",
+                #         title="Load snapshot",
+                #         filetypes=(
+                #             ("NumPy array files", "*.npy"),
+                #             ("All files", "*.*")))
+                #     if file:
+                #         board = scipy.load(file)
+                #         print("Loaded snapshot from {}".format(file))
 
                 elif event.key == pygame.K_n:  # Progress single generation and pause on N
                     if not paused:
                         paused = True
-                    board = libgol.compute_generation(
-                        board, ruleset=active_ruleset, wrap=wrap)
+                    board.compute_generation(ruleset=active_ruleset)
 
                 elif event.key == pygame.K_RIGHT:  # Increase speed on Right Arrow
                     interval = max(interval-INTERVAL_STEPS, 0)
@@ -207,17 +214,17 @@ if __name__ == "__main__":
                     board[pos] = draw_mode
 
         if not paused:
-            board = libgol.compute_generation(
-                board, ruleset=active_ruleset, wrap=wrap)
+            board.compute_generation(ruleset=active_ruleset)
         draw_board(
             screen,
             board,
+            (0, 0, WIDTH//CELL_SIZE, HEIGHT//CELL_SIZE),
             CELL_SIZE,
             color_scheme=active_ruleset["colors"] if "colors" in active_ruleset else color_scheme_default)
         draw_cursor(
             screen,
             screen_pos_to_cell(pygame.mouse.get_pos(), CELL_SIZE),
             CELL_SIZE)
-        
+
         pygame.display.flip()
         sleep(interval)
